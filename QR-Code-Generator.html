@@ -1,62 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR-Code-Generator</title>
 </head>
 <style>
-    *{
+    * {
         padding: 0;
         margin: 0;
         box-sizing: border-box;
     }
-    body{
+
+    body {
         background-color: rgb(66, 66, 78);
 
     }
-    .container{
-        margin:15rem 30rem;
+
+    .container {
+        margin: 15rem 30rem;
         background-color: rgb(255, 255, 255);
         min-width: 300px;
         border-radius: 1rem;
         padding: 20px;
+
     }
-    @media(max-width:1000px){
-            .container{
-            margin:13rem 15rem ;
-        } 
-    }   
-    #info{
+
+    @media(max-width:1000px) {
+        .container {
+            margin: 13rem 15rem;
+        }
+    }
+
+    #info {
         outline: none;
         width: 100%;
         height: 2rem;
         font-size: 12px;
         padding: 5px;
     }
-    #qr-button{
+
+    #qr-button {
         outline: none;
         border: none;
         border-radius: 5px;
         cursor: pointer;
         width: 100%;
-        height: 2rem;  
+        height: 2rem;
         background-color: rgb(115, 115, 199);
-        color: rgb(255, 254, 254); 
+        color: rgb(255, 254, 254);
         font-size: 12px;
     }
-    
+
+    #qr-container {
+        max-height: 0;
+        padding: 10px;
+        width: 200px;
+        border-radius: 5px;
+        overflow: hidden;
+        transition: max-height 2s;
+        /* this creates a simple animation */
+        */
+    }
+
+    #qr-image {
+        width: 100%;
+        padding: 10px;
+    }
+
+    #qr-container.show-image {
+        max-height: 300px;
+        margin: 10px auto;
+        border: 1px solid rgb(165, 153, 153);
+    }
+    #info.error{
+        animation: shake 0.1s linear 10;
+    }
+    @keyframes shake {
+        0% {
+            transform: translateX(0);
+        }
+        25%{
+            transform: translateX(-2px);
+        }
+        50% {
+            transform: translateX(0);
+        }
+        75% {
+            transform: translateX(-2px);
+        }
+        100% {
+            transform: translateX(0);
+        }
+    }
 </style>
+
 <body>
     <div class="container">
         <h4>Enter your text or URL</h4>
         <input type="text" id="info">
-        <div class="qr-container">
+        <div id="qr-container">
             <img src="" id="qr-image">
-            <div>
-                <button id="qr-button">Generate QR Code</button>
-            </div>
+        </div>
+        <div>
+            <button id="qr-button">Generate QR Code</button>
         </div>
     </div>
+    <script>
+
+        let input = document.getElementById("info");
+        let button = document.getElementById("qr-button");
+        let qrContainer = document.getElementById("qr-container");
+        let qrImage = document.getElementById("qr-image");
+        let container = document.querySelector(".container");
+
+        let savedInputValue = localStorage.getItem("inputValue");
+        let savedQrUrl = localStorage.getItem("qrUrl");
+
+        if(savedInputValue){
+            input.value = savedInputValue;
+        }
+        
+        if(savedQrUrl){
+            qrImage.src = savedQrUrl;
+            qrContainer.classList.add("show-image");
+        }
+
+        button.addEventListener("click", generateQr);
+        input.addEventListener("keydown", function(event){
+            if(event.key === "Enter"){
+                generateQr();
+            }
+        });
+
+        function generateQr(){
+            if (input.value.length > 0) {
+                let qrUrl = ` https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${input.value}`;
+                qrImage.src = qrUrl;
+                qrContainer.classList.add("show-image");
+                saveData(input.value, qrUrl);
+            }else{
+                input.classList.add("error");
+                setTimeout(()=>{
+                    input.classList.remove("error");
+                }, 1000);
+            }
+        }
+
+        function saveData(inputValue, qrUrl){
+            localStorage.setItem("inputValue", inputValue);
+            localStorage.setItem("qrUrl", qrUrl);
+        }
+    </script>
 </body>
+
 </html>
